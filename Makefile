@@ -1,10 +1,15 @@
 CC=gcc
 CFLAGS=-Wall -Werror
 
-OUT=bmap
-FILE=bitmap.c
+OUT=sha.out
+OBJECTS=bitmap.c sha256.c
+
 
 default:
-	$(CC) $(CFLAGS) -o $(OUT) $(FILE) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(OUT) $(OBJECTS) $(LDFLAGS)
+
 clean:
-	rm $(OUT)
+	rm -f *.o $(OUT)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<

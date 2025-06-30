@@ -1,14 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
-#define BYTE_SIZE 8
-
-typedef unsigned char byte;
-
-typedef struct bitmap {
-  int size;
-  byte *map;
-} bitmap;
+#include "bitmap.h"
 
 static int full_bytes_needed(const int num_bits) { return (num_bits / BYTE_SIZE) + ((num_bits % BYTE_SIZE) != 0); }
 
@@ -106,23 +98,4 @@ void bitmap_print_den_on_line(const bitmap bmap) {
 void bitmap_delete(bitmap bmap) {
   free(bmap.map);
   bmap.map = NULL;
-}
-
-int main() {
-  bitmap bmap = bitmap_init(20);
-
-  bitmap_set_bit(bmap, 3, 1);
-  bitmap_set_bit(bmap, 5, 1);
-  bitmap_set_bit(bmap, 9, 1);
-  for (int k = 11; k < 20; k++) {
-    bitmap_set_bit(bmap, k, 1);
-  }
-  bitmap_set_bit(bmap, 18, 0);
-  bitmap_set_byte(bmap, 1, 'a');
-
-  bitmap_print_bin_on_line(bmap);
-  bitmap_print_den_on_line(bmap);
-  bitmap_delete(bmap);
-
-  return EXIT_SUCCESS;
 }
