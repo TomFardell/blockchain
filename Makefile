@@ -1,15 +1,15 @@
 CC=gcc
 CFLAGS=-Wall -Werror
 
-OUT=sha.out
-OBJECTS=bitmap.c sha256.c
+TESTS_OUT=tests.out
+TEST_OBJECT=tests.o
+OBJECTS=bitmap.o sha256.o
 
-
-default:
-	$(CC) $(CFLAGS) -o $(OUT) $(OBJECTS) $(LDFLAGS)
+tests: $(TEST_OBJECT) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TESTS_OUT) $(TEST_OBJECT) $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f *.o $(OUT)
+	rm -f *.o $(TESTS_OUT)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<

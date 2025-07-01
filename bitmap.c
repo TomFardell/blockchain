@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "bitmap.h"
 
-static int full_bytes_needed(int num_bits) { return (num_bits / BYTE_SIZE) + ((num_bits % BYTE_SIZE) != 0); }
+int _full_bytes_needed(int num_bits) { return (num_bits / BYTE_SIZE) + ((num_bits % BYTE_SIZE) != 0); }
 
-bitmap bitmap_init(int size) {
-  int bytes_required = full_bytes_needed(size);
+bitmap bitmap_init_zeros(int size) {
+  int bytes_required = _full_bytes_needed(size);
   unsigned char *map = calloc(bytes_required, 1);
   if (!map) {
     fprintf(stderr, "Failed to allocate memory for bitmap.\n");
@@ -13,6 +14,23 @@ bitmap bitmap_init(int size) {
   }
 
   return (bitmap){size, map};
+}
+
+bitmap bitmap_init_string(const char *string) {
+  bitmap result = bitmap_init_zeros(strlen(string));
+
+  for (int i = 0; i < result.size; i++) {
+    if (string[i] != '0' && string[i] != '1') {
+      fprintf(stderr, "The character '%c' (position %d of \"%s\") is invalid for bitmap input.\n", string[i], i,
+              string);
+      bitmap_free(result);
+      exit(EXIT_FAILURE);
+    }
+
+    bitmap_set_bit(result, i, (string[i] == '1'));
+  }
+
+  return result;
 }
 
 // Get the bit in a position, either 0 or 1
@@ -50,14 +68,24 @@ void bitmap_set_bit(bitmap bmap, int index, int new_value) {
 // starting at the 16th bit. If the bitmap's size is not a multiple of 8, we can still set the final byte, though
 // we cannot access the trailing bits individually. Note we are not accessing any memory we didn't allocate
 void bitmap_set_byte(bitmap bmap, int byte_index, byte new_value) {
-  if (byte_index < 0 || byte_index >= full_bytes_needed(bmap.size)) {
+  if (byte_index < 0 || byte_index >= _full_bytes_needed(bmap.size)) {
     fprintf(stderr, "Byte index %d is out of range for bitmap of size %d (%d bytes).\n", byte_index, bmap.size,
-            full_bytes_needed(bmap.size));
+            _full_bytes_needed(bmap.size));
     exit(EXIT_FAILURE);
   }
 
   // Simply set the byte
   bmap.map[byte_index] = new_value;
+}
+
+int bitmap_equal(bitmap bmap1, bitmap bmap2) {
+  if (bmap1.size != bmap2.size) return 0;
+
+  for (int i = 0; i < bmap1.size; i++) {
+    if (bitmap_get_bit(bmap1, i) != bitmap_get_bit(bmap2, i)) return 0;
+  }
+
+  return 1;
 }
 
 void bitmap_print_bin(bitmap bmap) {
@@ -74,7 +102,7 @@ void bitmap_print_bin_on_line(bitmap bmap) {
 
 // Note for non multiples of 8, the final entry assumes trailing zeros are present in the map
 void bitmap_print_hex(bitmap bmap) {
-  for (int i = 0; i < full_bytes_needed(bmap.size); i++) {
+  for (int i = 0; i < _full_bytes_needed(bmap.size); i++) {
     printf("%02x ", bmap.map[i]);
   }
 }
@@ -85,7 +113,7 @@ void bitmap_print_hex_on_line(bitmap bmap) {
 }
 
 void bitmap_print_den(bitmap bmap) {
-  for (int i = 0; i < full_bytes_needed(bmap.size); i++) {
+  for (int i = 0; i < _full_bytes_needed(bmap.size); i++) {
     printf("%03d ", bmap.map[i]);
   }
 }
@@ -96,6 +124,7 @@ void bitmap_print_den_on_line(bitmap bmap) {
 }
 
 void bitmap_free(bitmap bmap) {
+  if (bmap.map == NULL) return;
   free(bmap.map);
   bmap.map = NULL;
 }
