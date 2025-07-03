@@ -97,24 +97,49 @@ int bitmap_equal(bitmap bmap1, bitmap bmap2) {
   return 1;
 }
 
-bitmap bitmap_xor(bitmap bmap1, bitmap bmap2) {
+bitmap _bitmap_dual_operator(bitmap bmap1, bitmap bmap2, DualOperator operation) {
   if (bmap1.size != bmap2.size) {
-    fprintf(stderr, "Cannot perform XOR on differently sized bitmaps (%d and %d).\n", bmap1.size, bmap2.size);
+    fprintf(stderr, "Cannot perform operation on differently sized bitmaps (%d and %d).\n", bmap1.size,
+            bmap2.size);
   }
 
   bitmap result = bitmap_init_zeros(bmap1.size);
 
   // Do the XOR on bytes first
   for (int i = 0; i < bmap1.size / 8; i++) {
-    bitmap_set_byte(&result, i, bmap1.map[i] ^ bmap2.map[i]);
+    switch (operation) {
+      case OR:
+        bitmap_set_byte(&result, i, bmap1.map[i] | bmap2.map[i]);
+        break;
+      case AND:
+        bitmap_set_byte(&result, i, bmap1.map[i] & bmap2.map[i]);
+        break;
+      case XOR:
+        bitmap_set_byte(&result, i, bmap1.map[i] ^ bmap2.map[i]);
+        break;
+    }
   }
 
   for (int i = 8 * (bmap1.size / 8); i < bmap1.size; i++) {
-    bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i) ^ bitmap_get_bit(bmap2, i));
+    switch (operation) {
+      case OR:
+        bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i) | bitmap_get_bit(bmap2, i));
+        break;
+      case AND:
+        bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i) & bitmap_get_bit(bmap2, i));
+        break;
+      case XOR:
+        bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i) ^ bitmap_get_bit(bmap2, i));
+        break;
+    }
   }
 
   return result;
 }
+
+bitmap bitmap_or(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap1, bmap2, OR); }
+bitmap bitmap_and(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap1, bmap2, AND); }
+bitmap bitmap_xor(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap1, bmap2, XOR); }
 
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
