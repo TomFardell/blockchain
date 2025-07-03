@@ -141,6 +141,31 @@ bitmap bitmap_or(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap
 bitmap bitmap_and(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap1, bmap2, AND); }
 bitmap bitmap_xor(bitmap bmap1, bitmap bmap2) { return _bitmap_dual_operator(bmap1, bmap2, XOR); }
 
+bitmap bitmap_lshift(bitmap bmap, int count) {
+  // Handle negative counts by just passsing to the other method
+  if (count < 0) return bitmap_rshift(bmap, -count);
+
+  bitmap result = bitmap_init_zeros(bmap.size);
+
+  for (int i = count; i < bmap.size; i++) {
+    bitmap_set_bit(&result, i - count, bitmap_get_bit(bmap, i));
+  }
+
+  return result;
+}
+
+bitmap bitmap_rshift(bitmap bmap, int count) {
+  if (count < 0) return bitmap_lshift(bmap, -count);
+
+  bitmap result = bitmap_init_zeros(bmap.size);
+
+  for (int i = count; i < bmap.size; i++) {
+    bitmap_set_bit(&result, i, bitmap_get_bit(bmap, i - count));
+  }
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));

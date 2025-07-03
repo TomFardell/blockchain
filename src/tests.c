@@ -3,7 +3,7 @@
 #include "bitmap.h"
 #include "sha256.h"
 
-#define NUM_BITMAP_TESTS 9
+#define NUM_BITMAP_TESTS 12
 #define NUM_SHA256_TESTS 2
 
 typedef int (*test)(void);
@@ -119,6 +119,57 @@ int test_bitmap_9() {
   return (result == 1);
 }
 
+int test_bitmap_10() {
+  bitmap bmap = bitmap_init_string("110111001");
+  bitmap expected = bitmap_init_string("011100100");
+
+  bitmap lshift = bitmap_lshift(bmap, 2);
+  bitmap neg_rshift = bitmap_rshift(bmap, -2);
+
+  int result = bitmap_equal(expected, lshift) + bitmap_equal(expected, neg_rshift);
+
+  bitmap_free(&bmap);
+  bitmap_free(&expected);
+  bitmap_free(&lshift);
+  bitmap_free(&neg_rshift);
+
+  return (result == 2);
+}
+
+int test_bitmap_11() {
+  bitmap bmap = bitmap_init_string("110111001");
+  bitmap expected = bitmap_init_string("001101110");
+
+  bitmap rshift = bitmap_rshift(bmap, 2);
+  bitmap neg_lshift = bitmap_lshift(bmap, -2);
+
+  int result = bitmap_equal(expected, rshift) + bitmap_equal(expected, neg_lshift);
+
+  bitmap_free(&bmap);
+  bitmap_free(&expected);
+  bitmap_free(&rshift);
+  bitmap_free(&neg_lshift);
+
+  return (result == 2);
+}
+
+int test_bitmap_12() {
+  bitmap bmap = bitmap_init_string("110111001");
+  bitmap expected = bitmap_init_zeros(9);
+
+  bitmap lshift = bitmap_lshift(bmap, 20);
+  bitmap rshift = bitmap_rshift(bmap, 20);
+
+  int result = bitmap_equal(expected, lshift) + bitmap_equal(expected, rshift);
+
+  bitmap_free(&bmap);
+  bitmap_free(&expected);
+  bitmap_free(&lshift);
+  bitmap_free(&rshift);
+
+  return (result == 2);
+}
+
 int test_sha256_1() {
   bitmap padded = _pad_message(
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -166,8 +217,9 @@ int test_sha256_2() {
 
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
-  test tests[NUM_BITMAP_TESTS] = {&test_bitmap_1, &test_bitmap_2, &test_bitmap_3, &test_bitmap_4, &test_bitmap_5,
-                                  &test_bitmap_6, &test_bitmap_7, &test_bitmap_8, &test_bitmap_9};
+  test tests[NUM_BITMAP_TESTS] = {&test_bitmap_1, &test_bitmap_2,  &test_bitmap_3,  &test_bitmap_4,
+                                  &test_bitmap_5, &test_bitmap_6,  &test_bitmap_7,  &test_bitmap_8,
+                                  &test_bitmap_9, &test_bitmap_10, &test_bitmap_11, &test_bitmap_12};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BITMAP_TESTS; i++) {

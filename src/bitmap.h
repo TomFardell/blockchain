@@ -23,6 +23,8 @@ int bitmap_equal(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_or(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_and(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_xor(bitmap bmap1, bitmap bmap2);
+bitmap bitmap_lshift(bitmap bmap, int count);
+bitmap bitmap_rshift(bitmap bmap, int count);
 
 void bitmap_print_bin(bitmap bmap);
 void bitmap_print_bin_on_line(bitmap bmap);
