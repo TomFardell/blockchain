@@ -166,6 +166,38 @@ bitmap bitmap_rshift(bitmap bmap, int count) {
   return result;
 }
 
+bitmap bitmap_lrotate(bitmap bmap, int count) {
+  if (count < 0) return bitmap_rrotate(bmap, -count);
+
+  count = count % bmap.size;  // This method requires count to be between 0 and the size of the bitmap
+
+  bitmap lshifted = bitmap_lshift(bmap, count);              // Bits shifted left
+  bitmap rshifted = bitmap_rshift(bmap, bmap.size - count);  // Wrapped around bits
+
+  bitmap result = bitmap_or(lshifted, rshifted);  // Get both sets of bits
+
+  bitmap_free(&lshifted);
+  bitmap_free(&rshifted);
+
+  return result;
+}
+
+bitmap bitmap_rrotate(bitmap bmap, int count) {
+  if (count < 0) return bitmap_lrotate(bmap, -count);
+
+  count = count % bmap.size;  // This method requires count to be between 0 and the size of the bitmap
+
+  bitmap rshifted = bitmap_rshift(bmap, count);              // Bits shifted right
+  bitmap lshifted = bitmap_lshift(bmap, bmap.size - count);  // Wrapped around bits
+
+  bitmap result = bitmap_or(lshifted, rshifted);  // Get both sets of bits
+
+  bitmap_free(&lshifted);
+  bitmap_free(&rshifted);
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));
