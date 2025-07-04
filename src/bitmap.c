@@ -286,6 +286,25 @@ bitmap bitmap_choose(bitmap choices, bitmap bmap1, bitmap bmap2) {
   return result;
 }
 
+// Get the resultant bitmap from choosing the majority bit at each index
+bitmap bitmap_majority(bitmap bmap1, bitmap bmap2, bitmap bmap3) {
+  if (bmap1.size != bmap2.size || bmap1.size != bmap3.size) {
+    fprintf(stderr, "The three bitmaps must be of the same size (not %d, %d and %d).\n", bmap1.size, bmap2.size,
+            bmap3.size);
+    exit(EXIT_FAILURE);
+  }
+
+  bitmap result = bitmap_init_zeros(bmap1.size);
+
+  for (int i = 0; i < bmap1.size; i++) {
+    if (bitmap_get_bit(bmap1, i) + bitmap_get_bit(bmap2, i) + bitmap_get_bit(bmap3, i) > 1) {
+      bitmap_set_bit(&result, i, 1);
+    }
+  }
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));
