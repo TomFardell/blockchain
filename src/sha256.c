@@ -29,11 +29,9 @@ bitmap _pad_message(const char *message, int char_count) {
 
   bitmap_set_bit(&padded_message, l, 1);
 
-  // Iterate through 00000000000000ff, 000000000000ff00, ..., ff00000000000000 and enumerate in i
-  for (u64 window = 255, i = 0; window > 0; window <<= BYTE_SIZE, i++) {
-    byte this_byte = (l & window) >> (BYTE_SIZE * i);  // The ith digit of l in base 256
-    bitmap_set_byte(&padded_message, (padded_message.size / BYTE_SIZE) - i - 1, this_byte);
-  }
+  bitmap_set_bytes_from_number(&padded_message, l,
+                               (padded_message.size / BYTE_SIZE) - (MESSAGE_LENGTH_SIZE / BYTE_SIZE),
+                               MESSAGE_LENGTH_SIZE / BYTE_SIZE);
 
   return padded_message;
 }

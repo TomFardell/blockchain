@@ -10,7 +10,7 @@ bitmap bitmap_init_zeros(int size) {
   }
 
   int bytes_required = _full_bytes_needed(size);
-  unsigned char *map = calloc(bytes_required, 1);
+  byte *map = calloc(bytes_required, sizeof *map);
   if (!map) {
     fprintf(stderr, "Failed to allocate memory for bitmap.\n");
     exit(EXIT_FAILURE);
@@ -32,6 +32,19 @@ bitmap bitmap_init_string(const char *string) {
 
     bitmap_set_bit(&result, i, (string[i] == '1'));
   }
+
+  return result;
+}
+
+// Get the bitmap corresponding to a specific number fit into a specified number of bytes
+bitmap bitmap_init_number(u64 number, int bytes) {
+  if (bytes < 0) {
+    fprintf(stderr, "Bitmap cannot be initialised with size %d bytes.\n", bytes);
+    exit(EXIT_FAILURE);
+  }
+
+  bitmap result = bitmap_init_zeros(bytes * BYTE_SIZE);
+  bitmap_set_bytes_from_number(&result, number, 0, bytes);
 
   return result;
 }
@@ -79,6 +92,23 @@ void bitmap_set_byte(bitmap *bmap, int byte_index, byte new_value) {
 
   // Simply set the byte
   bmap->map[byte_index] = new_value;
+}
+
+void bitmap_set_bytes_from_number(bitmap *bmap, u64 number, int starting_byte, int num_bytes) {
+  // These are just for the error checking
+  int starting_bit = starting_byte * BYTE_SIZE;
+  int num_bits = num_bytes * BYTE_SIZE;
+  if (starting_bit < 0 || starting_bit + num_bits > bmap->size || num_bits < 0) {
+    fprintf(stderr, "Bytes [%d:%d] (bits [%d:%d]) are out of range for bitmap of size %d.\n", starting_byte,
+            starting_byte + num_bytes, starting_bit, starting_bit + num_bits, bmap->size);
+    exit(EXIT_FAILURE);
+  }
+
+  // Iterate through 00...00ff, 00...ff00, ..., ff...0000 and enumerate in i
+  for (u64 window = 255, i = 0; i < num_bytes; window <<= BYTE_SIZE, i++) {
+    byte this_byte = (number & window) >> (BYTE_SIZE * i);  // The ith digit of the number in base 256
+    bitmap_set_byte(bmap, starting_byte + num_bytes - i - 1, this_byte);
+  }
 }
 
 int bitmap_equal(bitmap bmap1, bitmap bmap2) {
@@ -200,7 +230,7 @@ bitmap bitmap_rrotate(bitmap bmap, int count) {
 
 // Get the sub-bitmap between start_index (inclusive) and end_index (exclusive)
 bitmap bitmap_slice(bitmap bmap, int start_index, int end_index) {
-  if (start_index < 0 || end_index >= bmap.size || end_index < start_index) {
+  if (start_index < 0 || end_index > bmap.size || end_index < start_index) {
     fprintf(stderr, "Slice [%d:%d] is invalid for bitmap of size %d.\n", start_index, end_index, bmap.size);
     exit(EXIT_FAILURE);
   }

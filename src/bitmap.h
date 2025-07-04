@@ -2,8 +2,10 @@
 #define BITMAP_H
 
 #define BYTE_SIZE 8
+#define BYTE_COMBINATIONS 256
 
 typedef unsigned char byte;
+typedef unsigned long long u64;
 
 typedef enum DualOperator { OR, AND, XOR } DualOperator;
 
@@ -14,10 +16,12 @@ typedef struct bitmap {
 
 bitmap bitmap_init_zeros(int size);
 bitmap bitmap_init_string(const char *string);
+bitmap bitmap_init_number(u64 number, int bytes);
 
 int bitmap_get_bit(bitmap bmap, int index);
 void bitmap_set_bit(bitmap *bmap, int index, int new_value);
 void bitmap_set_byte(bitmap *bmap, int byte_index, byte new_value);
+void bitmap_set_bytes_from_number(bitmap *bmap, u64 number, int starting_byte, int num_bytes);
 
 int bitmap_equal(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_or(bitmap bmap1, bitmap bmap2);
