@@ -198,6 +198,22 @@ bitmap bitmap_rrotate(bitmap bmap, int count) {
   return result;
 }
 
+// Get the sub-bitmap between start_index (inclusive) and end_index (exclusive)
+bitmap bitmap_slice(bitmap bmap, int start_index, int end_index) {
+  if (start_index < 0 || end_index >= bmap.size || end_index < start_index) {
+    fprintf(stderr, "Slice [%d:%d] is invalid for bitmap of size %d.\n", start_index, end_index, bmap.size);
+    exit(EXIT_FAILURE);
+  }
+
+  bitmap result = bitmap_init_zeros(end_index - start_index);
+
+  for (int i = start_index; i < end_index; i++) {
+    bitmap_set_bit(&result, i - start_index, bitmap_get_bit(bmap, i));
+  }
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));

@@ -27,6 +27,7 @@ bitmap bitmap_lshift(bitmap bmap, int count);
 bitmap bitmap_rshift(bitmap bmap, int count);
 bitmap bitmap_lrotate(bitmap bmap, int count);
 bitmap bitmap_rrotate(bitmap bmap, int count);
+bitmap bitmap_slice(bitmap bmap, int start_index, int end_index);
 
 void bitmap_print_bin(bitmap bmap);
 void bitmap_print_bin_on_line(bitmap bmap);
