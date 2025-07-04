@@ -244,6 +244,31 @@ bitmap bitmap_slice(bitmap bmap, int start_index, int end_index) {
   return result;
 }
 
+// Select bits from bmap1 and bmap2
+// choices[i] == 1 -> Take bmap1[i]
+// choices[i] == 0 -> Take bmap2[i]
+bitmap bitmap_choose(bitmap choices, bitmap bmap1, bitmap bmap2) {
+  if (choices.size != bmap1.size || choices.size != bmap2.size) {
+    fprintf(stderr, "The three bitmaps must be of the same size (not %d, %d and %d).\n", choices.size, bmap1.size,
+            bmap2.size);
+    exit(EXIT_FAILURE);
+  }
+
+  bitmap result = bitmap_init_zeros(choices.size);
+  for (int i = 0; i < choices.size; i++) {
+    switch (bitmap_get_bit(choices, i)) {
+      case 1:
+        bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i));
+        break;
+      case 0:
+        bitmap_set_bit(&result, i, bitmap_get_bit(bmap2, i));
+        break;
+    }
+  }
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));

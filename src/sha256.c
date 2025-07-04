@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "bitmap.h"
 #include "sha256.h"
 
@@ -34,4 +37,77 @@ bitmap _pad_message(const char *message, int char_count) {
                                MESSAGE_LENGTH_SIZE / BYTE_SIZE);
 
   return padded_message;
+}
+
+bitmap _lower_sigma_0(bitmap bmap) {
+  bitmap bmap1 = bitmap_rrotate(bmap, 7);
+  bitmap bmap2 = bitmap_rrotate(bmap, 18);
+  bitmap bmap3 = bitmap_rshift(bmap, 3);
+  bitmap bmap4 = bitmap_xor(bmap1, bmap2);
+  bitmap result = bitmap_xor(bmap4, bmap3);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
+
+  return result;
+}
+
+bitmap _lower_sigma_1(bitmap bmap) {
+  bitmap bmap1 = bitmap_rrotate(bmap, 17);
+  bitmap bmap2 = bitmap_rrotate(bmap, 19);
+  bitmap bmap3 = bitmap_rshift(bmap, 10);
+  bitmap bmap4 = bitmap_xor(bmap1, bmap2);
+  bitmap result = bitmap_xor(bmap4, bmap3);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
+
+  return result;
+}
+
+bitmap _upper_sigma_0(bitmap bmap) {
+  bitmap bmap1 = bitmap_rrotate(bmap, 2);
+  bitmap bmap2 = bitmap_rrotate(bmap, 13);
+  bitmap bmap3 = bitmap_rrotate(bmap, 22);
+  bitmap bmap4 = bitmap_xor(bmap1, bmap2);
+  bitmap result = bitmap_xor(bmap4, bmap3);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
+
+  return result;
+}
+
+bitmap _upper_sigma_1(bitmap bmap) {
+  bitmap bmap1 = bitmap_rrotate(bmap, 6);
+  bitmap bmap2 = bitmap_rrotate(bmap, 11);
+  bitmap bmap3 = bitmap_rrotate(bmap, 25);
+  bitmap bmap4 = bitmap_xor(bmap1, bmap2);
+  bitmap result = bitmap_xor(bmap4, bmap3);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
+
+  return result;
+}
+
+bitmap sha256(const char *message) {
+  bitmap padded_message = _pad_message(message, strlen(message));
+
+  // Split up the padded message into 32 bit words
+  int num_words = padded_message.size / WORD_LENGTH;
+  bitmap *M = malloc(num_words * sizeof *M);
+  for (int i = 0; i < num_words; i++) {
+    *M = bitmap_slice(padded_message, i * WORD_LENGTH, (i + 1) * WORD_LENGTH);
+  }
+
+  return (bitmap){};
 }
