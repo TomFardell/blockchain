@@ -3,7 +3,7 @@
 #include "bitmap.h"
 #include "sha256.h"
 
-#define NUM_BITMAP_TESTS 17
+#define NUM_BITMAP_TESTS 18
 #define NUM_SHA256_TESTS 3
 
 typedef int (*test)(void);
@@ -256,6 +256,21 @@ int test_bitmap_17() {
   return (result == 1);
 }
 
+int test_bitmap_18() {
+  bitmap bmap = bitmap_init_string("11010011101");
+  bitmap expected = bitmap_init_string("00101100010");
+
+  bitmap not = bitmap_not(bmap);
+
+  int result = bitmap_equal(expected, not);
+
+  bitmap_free(&bmap);
+  bitmap_free(&expected);
+  bitmap_free(&not);
+
+  return (result == 1);
+}
+
 int test_sha256_1() {
   bitmap padded = _pad_message(
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -320,7 +335,7 @@ int test_bitmap_full() {
   test tests[NUM_BITMAP_TESTS] = {
       &test_bitmap_1,  &test_bitmap_2,  &test_bitmap_3,  &test_bitmap_4,  &test_bitmap_5,  &test_bitmap_6,
       &test_bitmap_7,  &test_bitmap_8,  &test_bitmap_9,  &test_bitmap_10, &test_bitmap_11, &test_bitmap_12,
-      &test_bitmap_13, &test_bitmap_14, &test_bitmap_15, &test_bitmap_16, &test_bitmap_17};
+      &test_bitmap_13, &test_bitmap_14, &test_bitmap_15, &test_bitmap_16, &test_bitmap_17, &test_bitmap_18};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BITMAP_TESTS; i++) {

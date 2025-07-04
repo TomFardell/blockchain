@@ -115,16 +115,32 @@ int bitmap_equal(bitmap bmap1, bitmap bmap2) {
   if (bmap1.size != bmap2.size) return 0;
 
   // Check bytes first for speed
-  for (int i = 0; i < bmap1.size / 8; i++) {
+  for (int i = 0; i < bmap1.size / BYTE_SIZE; i++) {
     if (bmap1.map[i] != bmap2.map[i]) return 0;
   }
 
   // Check only the necessary bits in the trailing byte
-  for (int i = 8 * (bmap1.size / 8); i < bmap1.size; i++) {
+  for (int i = BYTE_SIZE * (bmap1.size / BYTE_SIZE); i < bmap1.size; i++) {
     if (bitmap_get_bit(bmap1, i) != bitmap_get_bit(bmap2, i)) return 0;
   }
 
   return 1;
+}
+
+bitmap bitmap_not(bitmap bmap) {
+  bitmap result = bitmap_init_zeros(bmap.size);
+
+  // Invert each byte individually
+  for (int i = 0; i < bmap.size / BYTE_SIZE; i++) {
+    bitmap_set_byte(&result, i, ~bmap.map[i]);
+  }
+
+  // Then invert bits in the trailing byte
+  for (int i = BYTE_SIZE * (bmap.size / BYTE_SIZE); i < bmap.size; i++) {
+    bitmap_set_bit(&result, i, 1 - bitmap_get_bit(bmap, i));
+  }
+
+  return result;
 }
 
 bitmap _bitmap_dual_operator(bitmap bmap1, bitmap bmap2, DualOperator operation) {
@@ -135,8 +151,8 @@ bitmap _bitmap_dual_operator(bitmap bmap1, bitmap bmap2, DualOperator operation)
 
   bitmap result = bitmap_init_zeros(bmap1.size);
 
-  // Do the XOR on bytes first
-  for (int i = 0; i < bmap1.size / 8; i++) {
+  // Do the operation on bytes first
+  for (int i = 0; i < bmap1.size / BYTE_SIZE; i++) {
     switch (operation) {
       case OR:
         bitmap_set_byte(&result, i, bmap1.map[i] | bmap2.map[i]);
@@ -150,7 +166,8 @@ bitmap _bitmap_dual_operator(bitmap bmap1, bitmap bmap2, DualOperator operation)
     }
   }
 
-  for (int i = 8 * (bmap1.size / 8); i < bmap1.size; i++) {
+  // Then on the trailing bits
+  for (int i = BYTE_SIZE * (bmap1.size / BYTE_SIZE); i < bmap1.size; i++) {
     switch (operation) {
       case OR:
         bitmap_set_bit(&result, i, bitmap_get_bit(bmap1, i) | bitmap_get_bit(bmap2, i));

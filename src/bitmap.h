@@ -24,6 +24,7 @@ void bitmap_set_byte(bitmap *bmap, int byte_index, byte new_value);
 void bitmap_set_bytes_from_number(bitmap *bmap, u64 number, int starting_byte, int num_bytes);
 
 int bitmap_equal(bitmap bmap1, bitmap bmap2);
+bitmap bitmap_not(bitmap bmap);
 bitmap bitmap_or(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_and(bitmap bmap1, bitmap bmap2);
 bitmap bitmap_xor(bitmap bmap1, bitmap bmap2);
