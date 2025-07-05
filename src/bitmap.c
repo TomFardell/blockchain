@@ -305,6 +305,37 @@ bitmap bitmap_majority(bitmap bmap1, bitmap bmap2, bitmap bmap3) {
   return result;
 }
 
+// Add two bitmaps of equal size, truncating the result to have the same size
+bitmap bitmap_add_mod(bitmap bmap1, bitmap bmap2) {
+  if (bmap1.size != bmap2.size) {
+    fprintf(stderr, "Can only add two bitmaps of the same size (not %d and %d).\n", bmap1.size, bmap2.size);
+    exit(EXIT_FAILURE);
+  }
+
+  bitmap result = bitmap_init_zeros(bmap1.size);
+  int carry = 0;
+
+  // First add individual bits on the trailing byte
+  for (int i = bmap1.size - 1; i >= BYTE_SIZE * (bmap1.size / BYTE_SIZE); i--) {
+    int b1 = bitmap_get_bit(bmap1, i);
+    int b2 = bitmap_get_bit(bmap2, i);
+
+    bitmap_set_bit(&result, i, b1 ^ b2 ^ carry);
+    carry = b1 & b2;
+  }
+
+  // For the fully used bytes, do addition on each byte at a time
+  for (int i = bmap1.size / BYTE_SIZE; i >= 0; i--) {
+    int b1 = bmap1.map[i];
+    int b2 = bmap2.map[i];
+
+    bitmap_set_byte(&result, i, (b1 + b2 + carry) % BYTE_COMBINATIONS);
+    carry = ((b1 + b2) >= BYTE_COMBINATIONS);
+  }
+
+  return result;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));
