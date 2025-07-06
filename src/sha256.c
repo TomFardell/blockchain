@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "bitmap.h"
 #include "sha256.h"
@@ -17,13 +15,14 @@ static const int K0[NUM_WORK_ITERATIONS] = {
 static const int H0[NUM_WORKING_VARS] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
                                          0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
+// Convert `message` to a bitmap whose length is a multiple of 512 and is of the correct form for SHA-256
 bitmap _pad_message(const char *message, int char_count) {
   int l = char_count * BYTE_SIZE;
   int k = MESSAGE_BLOCK_SIZE - MESSAGE_LENGTH_SIZE - ((l + 1) % MESSAGE_BLOCK_SIZE);
   if (k < 0) k += MESSAGE_BLOCK_SIZE;
 
   // message | 1 | k zeros | length of message
-  int size = l + 1 + k + MESSAGE_LENGTH_SIZE;  // TODO: make the appropriate variables u64s
+  int size = l + 1 + k + MESSAGE_LENGTH_SIZE;
   bitmap padded_message = bitmap_init_zeros(size);
 
   for (int i = 0; i < char_count; i++) {
@@ -39,6 +38,7 @@ bitmap _pad_message(const char *message, int char_count) {
   return padded_message;
 }
 
+// SHA-256 helper function
 bitmap _lower_sigma_0(bitmap bmap) {
   bitmap bmap1 = bitmap_rrotate(bmap, 7);
   bitmap bmap2 = bitmap_rrotate(bmap, 18);
@@ -54,6 +54,7 @@ bitmap _lower_sigma_0(bitmap bmap) {
   return result;
 }
 
+// SHA-256 helper function
 bitmap _lower_sigma_1(bitmap bmap) {
   bitmap bmap1 = bitmap_rrotate(bmap, 17);
   bitmap bmap2 = bitmap_rrotate(bmap, 19);
@@ -69,6 +70,7 @@ bitmap _lower_sigma_1(bitmap bmap) {
   return result;
 }
 
+// SHA-256 helper function
 bitmap _upper_sigma_0(bitmap bmap) {
   bitmap bmap1 = bitmap_rrotate(bmap, 2);
   bitmap bmap2 = bitmap_rrotate(bmap, 13);
@@ -84,6 +86,7 @@ bitmap _upper_sigma_0(bitmap bmap) {
   return result;
 }
 
+// SHA-256 helper function
 bitmap _upper_sigma_1(bitmap bmap) {
   bitmap bmap1 = bitmap_rrotate(bmap, 6);
   bitmap bmap2 = bitmap_rrotate(bmap, 11);
@@ -99,6 +102,7 @@ bitmap _upper_sigma_1(bitmap bmap) {
   return result;
 }
 
+// Perform the SHA-256 hashing algorithm on the string `message`, returning the result as a bitmap
 bitmap sha256(const char *message) {
   bitmap padded_message = _pad_message(message, strlen(message));
 

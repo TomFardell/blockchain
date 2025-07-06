@@ -6,11 +6,14 @@
 #define NUM_BITMAP_TESTS 23
 #define NUM_SHA256_TESTS 5
 
+// Function signature for test functions
 typedef int (*test)(void);
 
 int test_bitmap_1() {
   bitmap bmap1 = bitmap_init_string("00101");
   bitmap bmap2 = bitmap_init_string("00101");
+  bitmap_set_byte(&bmap2, 0, 41);  // Checking this doesn't compare trailing bits
+
   int result = bitmap_equal(bmap1, bmap2);
 
   bitmap_free(&bmap1);
@@ -454,6 +457,7 @@ int test_sha256_5() {
   return (result == 1);
 }
 
+// Run full bitmap tests
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
   test tests[NUM_BITMAP_TESTS] = {
@@ -475,6 +479,7 @@ int test_bitmap_full() {
   return passed_tests;
 }
 
+// Run full SHA-256 tests
 int test_sha256_full() {
   printf("Commencing %d SHA-256 tests.\n", NUM_SHA256_TESTS);
   test tests[NUM_SHA256_TESTS] = {&test_sha256_1, &test_sha256_2, &test_sha256_3, &test_sha256_4, &test_sha256_5};
