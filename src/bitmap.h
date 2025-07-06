@@ -37,6 +37,7 @@ bitmap bitmap_copy(bitmap bmap);
 bitmap bitmap_choose(bitmap choices, bitmap bmap1, bitmap bmap2);
 bitmap bitmap_majority(bitmap bmap1, bitmap bmap2, bitmap bmap3);
 bitmap bitmap_add_mod(bitmap bmap1, bitmap bmap2);
+int bitmap_leading_zeros(bitmap bmap);
 
 void bitmap_print_bin(bitmap bmap);
 void bitmap_print_bin_on_line(bitmap bmap);

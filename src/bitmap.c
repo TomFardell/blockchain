@@ -344,6 +344,26 @@ bitmap bitmap_add_mod(bitmap bmap1, bitmap bmap2) {
   return result;
 }
 
+int bitmap_leading_zeros(bitmap bmap) {
+  // First count how many bytes are fully zeroed
+  int zeroed_bytes = 0;
+  while (bmap.map[zeroed_bytes] == 0) {
+    zeroed_bytes++;
+    // For a non-multiple-of-8 sized bitmap, there could be ones in the final byte but outside of the bitmap. In
+    // this scenario, the method won't return here, but the next part will ensure the correct result is given
+    if (zeroed_bytes == _full_bytes_needed(bmap.size)) return bmap.size;
+  }
+
+  // For the final byte, count the zeros individually
+  int zeroed_bits = zeroed_bytes * BYTE_SIZE;
+  while (zeroed_bits < (zeroed_bytes + 1) * BYTE_SIZE && zeroed_bits < bmap.size) {
+    if (bitmap_get_bit(bmap, zeroed_bits) != 0) break;
+    zeroed_bits++;
+  }
+
+  return zeroed_bits;
+}
+
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
     printf("%d", bitmap_get_bit(bmap, i));
