@@ -261,6 +261,14 @@ bitmap bitmap_slice(bitmap bmap, int start_index, int end_index) {
   return result;
 }
 
+// Return a copy of a bitmap
+bitmap bitmap_copy(bitmap bmap) {
+  bitmap result = bitmap_init_zeros(bmap.size);
+  memcpy(result.map, bmap.map, _full_bytes_needed(bmap.size));
+
+  return result;
+}
+
 // Select bits from bmap1 and bmap2
 // choices[i] == 1 -> Take bmap1[i]
 // choices[i] == 0 -> Take bmap2[i]
@@ -325,12 +333,12 @@ bitmap bitmap_add_mod(bitmap bmap1, bitmap bmap2) {
   }
 
   // For the fully used bytes, do addition on each byte at a time
-  for (int i = bmap1.size / BYTE_SIZE; i >= 0; i--) {
+  for (int i = bmap1.size / BYTE_SIZE - 1; i >= 0; i--) {
     int b1 = bmap1.map[i];
     int b2 = bmap2.map[i];
 
     bitmap_set_byte(&result, i, (b1 + b2 + carry) % BYTE_COMBINATIONS);
-    carry = ((b1 + b2) >= BYTE_COMBINATIONS);
+    carry = ((b1 + b2 + carry) >= BYTE_COMBINATIONS);
   }
 
   return result;
@@ -375,7 +383,6 @@ void bitmap_free(bitmap *bmap) {
   if (bmap->map == NULL) return;
   free(bmap->map);
   bmap->map = NULL;
-  bmap = NULL;
 }
 
 int _full_bytes_needed(int num_bits) { return (num_bits / BYTE_SIZE) + ((num_bits % BYTE_SIZE) != 0); }

@@ -3,8 +3,8 @@
 #include "bitmap.h"
 #include "sha256.h"
 
-#define NUM_BITMAP_TESTS 20
-#define NUM_SHA256_TESTS 3
+#define NUM_BITMAP_TESTS 22
+#define NUM_SHA256_TESTS 5
 
 typedef int (*test)(void);
 
@@ -290,9 +290,32 @@ int test_bitmap_19() {
 }
 
 int test_bitmap_20() {
-  bitmap bmap1 = bitmap_init_string("111011101");
-  bitmap bmap2 = bitmap_init_string("101011011");
-  bitmap expected = bitmap_init_string("100111000");
+  bitmap bmap1 = bitmap_init_string("10000101000000000110101110011001");
+  bitmap bmap2 = bitmap_init_string("00010101111111111010110100110001");
+  bitmap expected = bitmap_init_string("10011011000000000001100011001010");
+
+  bitmap added = bitmap_add_mod(bmap1, bmap2);
+
+  int result = bitmap_equal(expected, added);
+
+  return (result == 1);
+}
+
+int test_bitmap_21() {
+  bitmap bmap1 = bitmap_init_string("1100110011001");
+  bitmap expected = bitmap_init_string("1100110011001");
+
+  bitmap copy = bitmap_copy(bmap1);
+
+  int result = bitmap_equal(expected, copy);
+
+  return (result == 1);
+}
+
+int test_bitmap_22() {
+  bitmap bmap1 = bitmap_init_string("11110000");
+  bitmap bmap2 = bitmap_init_string("00001111");
+  bitmap expected = bitmap_init_string("11111111");
 
   bitmap added = bitmap_add_mod(bmap1, bmap2);
 
@@ -347,8 +370,8 @@ int test_sha256_2() {
 }
 
 int test_sha256_3() {
-  bitmap bmap = bitmap_init_string("11000111000111000110010011000001");
-  bitmap expected = bitmap_init_string("10000010010111011100010110010110");
+  bitmap bmap = bitmap_init_string("01101100011011110110001101101011");
+  bitmap expected = bitmap_init_string("00000011100011111110100110110000");
 
   bitmap sigma = _lower_sigma_0(bmap);
   int result = bitmap_equal(expected, sigma);
@@ -360,13 +383,54 @@ int test_sha256_3() {
   return (result == 1);
 }
 
+int test_sha256_4() {
+  bitmap bmap1 = sha256("abc");
+  bitmap expected1 = bitmap_init_string(
+      "10111010011110000001011010111111100011110000000111001111111010100100000101000001010000001101111001011101101"
+      "01110001000100010001110110000000000110110000110100011100101100001011101111010100111001011010000010000111111"
+      "110110000111110010000000000001010110101101");
+
+  bitmap bmap2 = sha256("I love coding!!");
+  bitmap expected2 = bitmap_init_string(
+      "01111110111101111010110010001101111101100110110001101000101001101011001101111011111000011000101001100010110"
+      "00000111100100010101010010110100101100111011101001001100111000100000100101010101110000100011011000101001100"
+      "100001100011100010011101000011001111010001");
+
+  int result = bitmap_equal(expected1, bmap1) + bitmap_equal(expected2, bmap2);
+
+  return (result == 2);
+}
+
+int test_sha256_5() {
+  bitmap a = bitmap_init_string("10001110000001001110110010111001");
+  bitmap b = bitmap_init_string("10000101101000000111101101011111");
+  bitmap c = bitmap_init_string("11100101000000110000001110000000");
+  bitmap expected = bitmap_init_string("10011011000000000001100011001010");
+
+  bitmap sig0 = _upper_sigma_0(a);
+  bitmap maj = bitmap_majority(a, b, c);
+  bitmap added = bitmap_add_mod(sig0, maj);
+
+  int result = bitmap_equal(expected, added);
+
+  bitmap_free(&a);
+  bitmap_free(&b);
+  bitmap_free(&c);
+  bitmap_free(&sig0);
+  bitmap_free(&maj);
+  bitmap_free(&added);
+  bitmap_free(&expected);
+
+  return (result == 1);
+}
+
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
-  test tests[NUM_BITMAP_TESTS] = {&test_bitmap_1,  &test_bitmap_2,  &test_bitmap_3,  &test_bitmap_4,
-                                  &test_bitmap_5,  &test_bitmap_6,  &test_bitmap_7,  &test_bitmap_8,
-                                  &test_bitmap_9,  &test_bitmap_10, &test_bitmap_11, &test_bitmap_12,
-                                  &test_bitmap_13, &test_bitmap_14, &test_bitmap_15, &test_bitmap_16,
-                                  &test_bitmap_17, &test_bitmap_18, &test_bitmap_19, &test_bitmap_20};
+  test tests[NUM_BITMAP_TESTS] = {
+      &test_bitmap_1,  &test_bitmap_2,  &test_bitmap_3,  &test_bitmap_4,  &test_bitmap_5,  &test_bitmap_6,
+      &test_bitmap_7,  &test_bitmap_8,  &test_bitmap_9,  &test_bitmap_10, &test_bitmap_11, &test_bitmap_12,
+      &test_bitmap_13, &test_bitmap_14, &test_bitmap_15, &test_bitmap_16, &test_bitmap_17, &test_bitmap_18,
+      &test_bitmap_19, &test_bitmap_20, &test_bitmap_21, &test_bitmap_22};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BITMAP_TESTS; i++) {
@@ -383,7 +447,7 @@ int test_bitmap_full() {
 
 int test_sha256_full() {
   printf("Commencing %d SHA-256 tests.\n", NUM_SHA256_TESTS);
-  test tests[NUM_SHA256_TESTS] = {&test_sha256_1, &test_sha256_2, &test_sha256_3};
+  test tests[NUM_SHA256_TESTS] = {&test_sha256_1, &test_sha256_2, &test_sha256_3, &test_sha256_4, &test_sha256_5};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_SHA256_TESTS; i++) {
