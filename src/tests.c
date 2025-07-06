@@ -412,9 +412,23 @@ int test_sha256_4() {
       "00000111100100010101010010110100101100111011101001001100111000100000100101010101110000100011011000101001100"
       "100001100011100010011101000011001111010001");
 
-  int result = bitmap_equal(expected1, bmap1) + bitmap_equal(expected2, bmap2);
+  bitmap bmap3 = sha256(
+      "bitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitma"
+      "pbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitm"
+      "apbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbit"
+      "mapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbi"
+      "tmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapb"
+      "itmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmap"
+      "bitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitmapbitma"
+      "pbitmapbitmapbitmapbitmapbitmapbitmapbitmap");
+  bitmap expected3 = bitmap_init_string(
+      "10001100000000111011000001110001010001000110011000100111110001000011101000001010101101100000100011110001110"
+      "11011111100010000011100100010100111001011000011101110001101010111001101000010100000100010001101101000101100"
+      "011111010011001011010111111100010100101001");
 
-  return (result == 2);
+  int result = bitmap_equal(expected1, bmap1) + bitmap_equal(expected2, bmap2) + bitmap_equal(expected3, bmap3);
+
+  return (result == 3);
 }
 
 int test_sha256_5() {
