@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include "bitmap.h"
 #include "sha256.h"
+#include "blockchain.h"
 
 #define NUM_BITMAP_TESTS 23
 #define NUM_SHA256_TESTS 5
+#define NUM_BLOCKCHAIN_TESTS 1
 
 // Function signature for test functions
 typedef int (*test)(void);
@@ -12,7 +14,7 @@ typedef int (*test)(void);
 int test_bitmap_1() {
   bitmap bmap1 = bitmap_init_string("00101");
   bitmap bmap2 = bitmap_init_string("00101");
-  bitmap_set_byte(&bmap2, 0, 41);  // Checking this doesn't compare trailing bits
+  bitmap_set_byte(&bmap2, 0, 41);  // Checking that this function doesn't compare trailing bits
 
   int result = bitmap_equal(bmap1, bmap2);
 
@@ -457,6 +459,16 @@ int test_sha256_5() {
   return (result == 1);
 }
 
+int test_blockchain_1() {
+  transaction t1 = transaction_init(100, 0, 1);
+  transaction t2 = transaction_init(200, 0, 1);
+  transaction t3 = transaction_init(300, 1, 0);
+
+  int result = (t1.transaction_id == 0) + (t2.transaction_id == 1) + (t3.transaction_id == 2);
+
+  return (result == 3);
+}
+
 // Run full bitmap tests
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
@@ -497,12 +509,32 @@ int test_sha256_full() {
   return passed_tests;
 }
 
+// Run blockchain tests
+int test_blockchain_full() {
+  printf("Commencing %d blockchain tests.\n", NUM_BLOCKCHAIN_TESTS);
+  test tests[NUM_BLOCKCHAIN_TESTS] = {test_blockchain_1};
+  int passed_tests = 0;
+
+  for (int i = 0; i < NUM_BLOCKCHAIN_TESTS; i++) {
+    if (tests[i]())
+      passed_tests++;
+    else
+      printf("> Test %d failed.\n", i + 1);
+  }
+
+  printf("Passed %d/%d SHA-256 tests.\n", passed_tests, NUM_BLOCKCHAIN_TESTS);
+
+  return passed_tests;
+}
+
 int main() {
   int passed_tests = 0;
   passed_tests += test_bitmap_full();
   printf("\n");
   passed_tests += test_sha256_full();
-  printf("\nPassed %d/%d tests.\n", passed_tests, NUM_BITMAP_TESTS + NUM_SHA256_TESTS);
+  printf("\n");
+  passed_tests += test_blockchain_full();
+  printf("\nPassed %d/%d tests.\n", passed_tests, NUM_BITMAP_TESTS + NUM_SHA256_TESTS + NUM_BLOCKCHAIN_TESTS);
 
   return EXIT_SUCCESS;
 }

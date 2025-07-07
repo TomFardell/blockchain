@@ -1,7 +1,7 @@
-#include "bitmap.h"
-
 #ifndef SHA256_H
 #define SHA256_H
+
+#include "bitmap.h"
 
 #define MESSAGE_BLOCK_SIZE 512
 #define MESSAGE_LENGTH_SIZE 64
