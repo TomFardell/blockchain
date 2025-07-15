@@ -10,4 +10,6 @@ typedef struct transaction {
 } transaction;
 
 transaction transaction_init(int amount, int payer_id, int payee_id);
+
+int _num_chars_to_hold_int_as_string(int num);
 #endif

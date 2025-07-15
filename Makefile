@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
+LDFLAGS=-lm
 
 FOLDER=src
 TESTS_OUT=tests.out
