@@ -382,7 +382,8 @@ int bitmap_leading_zeros(bitmap bmap) {
 // Store `bmap` as a string of zeros and ones in `buffer`
 void bitmap_string_bin(bitmap bmap, char *buffer, int buffer_size) {
   if (buffer_size < bmap.size + 1) {
-    fprintf(stderr, "Buffer of size %d is not large enough to hold bitmap of size %d.\n", buffer_size, bmap.size);
+    fprintf(stderr, "Buffer of size %d is not large enough to hold bitmap (requires size %d).\n", buffer_size,
+            bmap.size + 1);
     exit(EXIT_FAILURE);
   }
 

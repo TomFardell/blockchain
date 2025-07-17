@@ -486,25 +486,32 @@ int test_blockchain_1() {
 }
 
 int test_blockchain_2() {
-  int n1 = _num_chars_to_hold_int_as_string(20);
-  int n2 = _num_chars_to_hold_int_as_string(0);
-  int n3 = _num_chars_to_hold_int_as_string(-301);
-  int n4 = _num_chars_to_hold_int_as_string(99999);
+  int n1 = _num_chars_to_hold_int(0);
+  int n2 = _num_chars_to_hold_int(1);
+  int n3 = _num_chars_to_hold_int(-301);
+  int n4 = _num_chars_to_hold_int(99999);
 
-  int result = (n1 == 3) + (n2 == 2) + (n3 == 5) + (n4 == 6);
+  int n5 = _num_chars_to_hold_double(0.234);
+  int n6 = _num_chars_to_hold_double(-0.133200);
+  int n7 = _num_chars_to_hold_double(20.33);
+  int n8 = _num_chars_to_hold_double(-3000);
 
-  return (result == 4);
+  int result = (n1 == 1) + (n2 == 1) + (n3 == 4) + (n4 == 5) + (n5 == 3 + MAX_AMOUNT_PRECISION) +
+               (n6 == 4 + MAX_AMOUNT_PRECISION) + (n7 == 4 + MAX_AMOUNT_PRECISION) +
+               (n8 == 7 + MAX_AMOUNT_PRECISION);
+
+  return (result == 8);
 }
 
 int test_blockchain_3() {
   transaction t1 = transaction_init(0.344, 0, 1);
   transaction t2 = transaction_init(1293, 1, 0);
 
-  char b1[22];
-  char b2[25];
+  char b1[23];
+  char b2[26];
 
-  transaction_serialise(t1, b1, 22);
-  transaction_serialise(t2, b2, 25);
+  transaction_serialise(t1, b1, 23);
+  transaction_serialise(t2, b2, 26);
 
   int result = (strcmp(b1, "0 pays 1 0.344000 (3)") == 0) + (strcmp(b2, "1 pays 0 1293.000000 (4)") == 0);
 
