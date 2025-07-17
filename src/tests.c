@@ -5,7 +5,7 @@
 #include "sha256.h"
 #include "blockchain.h"
 
-#define NUM_BITMAP_TESTS 23
+#define NUM_BITMAP_TESTS 24
 #define NUM_SHA256_TESTS 5
 #define NUM_BLOCKCHAIN_TESTS 3
 
@@ -346,6 +346,21 @@ int test_bitmap_23() {
   return (result == 5);
 }
 
+int test_bitmap_24() {
+  bitmap bmap1 = bitmap_init_string("000111000");
+  bitmap bmap2 = bitmap_init_string("11001");
+
+  char b1[10];
+  char b2[6];
+
+  bitmap_string_bin(bmap1, b1, 10);
+  bitmap_string_bin(bmap2, b2, 6);
+
+  int result = (strcmp(b1, "000111000") == 0) + (strcmp(b2, "11001") == 0);
+
+  return (result == 2);
+}
+
 int test_sha256_1() {
   bitmap padded = _pad_message(
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -485,11 +500,11 @@ int test_blockchain_3() {
   transaction t1 = transaction_init(0.344, 0, 1);
   transaction t2 = transaction_init(1293, 1, 0);
 
-  char b1[100];
-  char b2[100];
+  char b1[22];
+  char b2[25];
 
-  transaction_serialise(t1, b1, 100);
-  transaction_serialise(t2, b2, 100);
+  transaction_serialise(t1, b1, 22);
+  transaction_serialise(t2, b2, 25);
 
   int result = (strcmp(b1, "0 pays 1 0.344000 (3)") == 0) + (strcmp(b2, "1 pays 0 1293.000000 (4)") == 0);
 
@@ -503,7 +518,7 @@ int test_bitmap_full() {
       &test_bitmap_1,  &test_bitmap_2,  &test_bitmap_3,  &test_bitmap_4,  &test_bitmap_5,  &test_bitmap_6,
       &test_bitmap_7,  &test_bitmap_8,  &test_bitmap_9,  &test_bitmap_10, &test_bitmap_11, &test_bitmap_12,
       &test_bitmap_13, &test_bitmap_14, &test_bitmap_15, &test_bitmap_16, &test_bitmap_17, &test_bitmap_18,
-      &test_bitmap_19, &test_bitmap_20, &test_bitmap_21, &test_bitmap_22, &test_bitmap_23};
+      &test_bitmap_19, &test_bitmap_20, &test_bitmap_21, &test_bitmap_22, &test_bitmap_23, &test_bitmap_24};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BITMAP_TESTS; i++) {

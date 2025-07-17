@@ -379,6 +379,20 @@ int bitmap_leading_zeros(bitmap bmap) {
   return zeroed_bits;
 }
 
+// Store `bmap` as a string of zeros and ones in `buffer`
+void bitmap_string_bin(bitmap bmap, char *buffer, int buffer_size) {
+  if (buffer_size < bmap.size + 1) {
+    fprintf(stderr, "Buffer of size %d is not large enough to hold bitmap of size %d.\n", buffer_size, bmap.size);
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < bmap.size; i++) {
+    buffer[i] = bitmap_get_bit(bmap, i) + '0';
+  }
+
+  buffer[bmap.size] = '\0';
+}
+
 // Print the bitmap in binary form
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {
