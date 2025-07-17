@@ -349,16 +349,23 @@ int test_bitmap_23() {
 int test_bitmap_24() {
   bitmap bmap1 = bitmap_init_string("000111000");
   bitmap bmap2 = bitmap_init_string("11001");
+  bitmap bmap3 = bitmap_init_string("11110001");
+  bitmap bmap4 = bitmap_init_string("1111101011001110");
 
   char b1[10];
   char b2[6];
+  char b3[3];
+  char b4[5];
 
   bitmap_string_bin(bmap1, b1, 10);
   bitmap_string_bin(bmap2, b2, 6);
+  bitmap_string_hex(bmap3, b3, 3);
+  bitmap_string_hex(bmap4, b4, 5);
 
-  int result = (strcmp(b1, "000111000") == 0) + (strcmp(b2, "11001") == 0);
+  int result = (strcmp(b1, "000111000") == 0) + (strcmp(b2, "11001") == 0) + (strcmp(b3, "f1") == 0) +
+               (strcmp(b4, "face") == 0);
 
-  return (result == 2);
+  return (result == 4);
 }
 
 int test_sha256_1() {

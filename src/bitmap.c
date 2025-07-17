@@ -394,6 +394,24 @@ void bitmap_string_bin(bitmap bmap, char *buffer, int buffer_size) {
   buffer[bmap.size] = '\0';
 }
 
+// Store `bmap` as a string of hexidecimal characters in `buffer`. If the size of `bmap` is not a multiple of 8,
+// this will reveal the trailing allocated bits in the final byte
+void bitmap_string_hex(bitmap bmap, char *buffer, int buffer_size) {
+  // Since each byte is two hexidecimal characters
+  int buffer_size_required = 2 * _full_bytes_needed(bmap.size) + 1;
+  if (buffer_size < buffer_size_required) {
+    fprintf(stderr, "Buffer of size %d is not large enough to hold bitmap (requires size %d).\n", buffer_size,
+            buffer_size_required);
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < buffer_size_required - 1; i += 2) {
+    sprintf(buffer + i, "%02x", bmap.map[i / 2]);
+  }
+
+  buffer[buffer_size_required - 1] = '\0';
+}
+
 // Print the bitmap in binary form
 void bitmap_print_bin(bitmap bmap) {
   for (int i = 0; i < bmap.size; i++) {

@@ -9,7 +9,8 @@
 #define SCHEDULE_LENGTH 64
 #define NUM_WORKING_VARS 8
 #define NUM_WORK_ITERATIONS 64
-#define HASH_SIZE 256
+#define HASH_SIZE_BITS 256
+#define HASH_SIZE_HEX_CHARS 64
 
 bitmap sha256(const char *message);
 

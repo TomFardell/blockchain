@@ -67,13 +67,13 @@ void block_serialise(block blk, char *buffer, char buffer_size) {
     exit(EXIT_FAILURE);
   }
 
-  char prev_hash_buffer[HASH_SIZE + 1];
+  char prev_hash_buffer[HASH_SIZE_HEX_CHARS + 1];
   char transaction_buffer[TRANSACTION_SERIALISATION_MAX_CHARS];
-  char proof_of_work_buffer[HASH_SIZE + 1];
+  char proof_of_work_buffer[HASH_SIZE_HEX_CHARS + 1];
 
-  bitmap_string_bin(blk.prev_hash, prev_hash_buffer, HASH_SIZE + 1);
+  bitmap_string_hex(blk.prev_hash, prev_hash_buffer, HASH_SIZE_HEX_CHARS + 1);
   transaction_serialise(blk.trans, transaction_buffer, TRANSACTION_SERIALISATION_MAX_CHARS);
-  bitmap_string_bin(blk.proof_of_work, proof_of_work_buffer, HASH_SIZE + 1);
+  bitmap_string_hex(blk.proof_of_work, proof_of_work_buffer, HASH_SIZE_HEX_CHARS + 1);
 
   sprintf(buffer, "%s\n%s\n%s", prev_hash_buffer, transaction_buffer, proof_of_work_buffer);
 }

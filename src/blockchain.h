@@ -26,7 +26,11 @@ typedef struct block {
 transaction transaction_init(double amount, int payer_id, int payee_id);
 void transaction_serialise(transaction trans, char *buffer, int buffer_size);
 
+void block_serialise(block blk, char *buffer, char buffer_size);
+
 int _num_chars_to_hold_int(int num);
 int _num_chars_to_hold_double(double num);
 int _num_chars_to_hold_transaction_serialisation(transaction trans);
+int _num_chars_to_hold_block_serialisation(block blk);
+
 #endif

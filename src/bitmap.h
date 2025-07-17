@@ -40,6 +40,7 @@ bitmap bitmap_add_mod(bitmap bmap1, bitmap bmap2);
 int bitmap_leading_zeros(bitmap bmap);
 
 void bitmap_string_bin(bitmap bmap, char *buffer, int buffer_size);
+void bitmap_string_hex(bitmap bmap, char *buffer, int buffer_size);
 void bitmap_print_bin(bitmap bmap);
 void bitmap_print_bin_on_line(bitmap bmap);
 void bitmap_print_hex(bitmap bmap);
