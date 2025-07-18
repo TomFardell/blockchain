@@ -7,7 +7,7 @@
 
 #define NUM_BITMAP_TESTS 24
 #define NUM_SHA256_TESTS 5
-#define NUM_BLOCKCHAIN_TESTS 3
+#define NUM_BLOCKCHAIN_TESTS 4
 
 // Function signature for test functions
 typedef int (*test)(void);
@@ -525,6 +525,25 @@ int test_blockchain_3() {
   return (result == 2);
 }
 
+int test_blockchain_4() {
+  transaction t1 = transaction_init(100, 0, 1);
+  transaction t2 = transaction_init(50, 1, 2);
+
+  block gen = block_init_genesis(t1);
+  block_find_proof_of_work(&gen);
+
+  block b1 = block_init(gen, t2);
+  block_find_proof_of_work(&b1);
+
+  int result = block_proof_of_work_is_valid(gen) + block_proof_of_work_is_valid(b1) +
+               block_prev_block_hash_matches(gen, b1);
+
+  block_free(&gen);
+  block_free(&b1);
+
+  return (result == 3);
+}
+
 // Run full bitmap tests
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
@@ -568,7 +587,8 @@ int test_sha256_full() {
 // Run blockchain tests
 int test_blockchain_full() {
   printf("Commencing %d blockchain tests.\n", NUM_BLOCKCHAIN_TESTS);
-  test tests[NUM_BLOCKCHAIN_TESTS] = {test_blockchain_1, test_blockchain_2, test_blockchain_3};
+  test tests[NUM_BLOCKCHAIN_TESTS] = {&test_blockchain_1, &test_blockchain_2, &test_blockchain_3,
+                                      &test_blockchain_4};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BLOCKCHAIN_TESTS; i++) {

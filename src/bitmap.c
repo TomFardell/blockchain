@@ -430,7 +430,7 @@ void bitmap_print_bin_on_line(bitmap bmap) {
 // allocated bits in the final byte
 void bitmap_print_hex(bitmap bmap) {
   for (int i = 0; i < _full_bytes_needed(bmap.size); i++) {
-    printf("%02x ", bmap.map[i]);
+    printf("%02x", bmap.map[i]);
   }
 }
 

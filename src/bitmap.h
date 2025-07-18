@@ -44,6 +44,7 @@ void bitmap_string_hex(bitmap bmap, char *buffer, int buffer_size);
 void bitmap_print_bin(bitmap bmap);
 void bitmap_print_bin_on_line(bitmap bmap);
 void bitmap_print_hex(bitmap bmap);
+void bitmap_print_hex_on_line(bitmap bmap);
 void bitmap_print_den(bitmap bmap);
 void bitmap_print_den_on_line(bitmap bmap);
 

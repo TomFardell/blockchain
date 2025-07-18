@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include "bitmap.h"
 #include "sha256.h"
 #include "blockchain.h"
 
@@ -31,8 +32,8 @@ int _num_chars_to_hold_transaction_serialisation(transaction trans) {
 
 // Get number of chars to (definitely) hold serialisation of `block` (NOT including null terminator)
 int _num_chars_to_hold_block_serialisation(block blk) {
-  return blk.prev_hash.size + _num_chars_to_hold_transaction_serialisation(blk.trans) + blk.proof_of_work.size +
-         strlen("\n\n");
+  return 2 * _full_bytes_needed(blk.prev_hash.size) + _num_chars_to_hold_transaction_serialisation(blk.trans) +
+         U64_MAX_CHARS + strlen("\n\n");
 }
 
 // Get a new transaction
@@ -58,7 +59,18 @@ void transaction_serialise(transaction trans, char *buffer, int buffer_size) {
           trans.transaction_id);
 }
 
-void block_serialise(block blk, char *buffer, char buffer_size) {
+// Given a transaction, create the genesis block
+block block_init_genesis(transaction trans) {
+  return (block){bitmap_init_zeros(0), trans, 0};  // Using size 0 bitmap as null
+}
+
+// Given a transaction and previous block, create a new block
+block block_init(block prev_block, transaction trans) {
+  return (block){block_hash(prev_block), trans, 0};  // Initialise with zero POW
+}
+
+// Serialise a block, `blk` into `buffer`
+void block_serialise(block blk, char *buffer, int buffer_size) {
   int buffer_size_required = _num_chars_to_hold_block_serialisation(blk) + 1;
 
   if (buffer_size < buffer_size_required) {
@@ -69,11 +81,55 @@ void block_serialise(block blk, char *buffer, char buffer_size) {
 
   char prev_hash_buffer[HASH_SIZE_HEX_CHARS + 1];
   char transaction_buffer[TRANSACTION_SERIALISATION_MAX_CHARS];
-  char proof_of_work_buffer[HASH_SIZE_HEX_CHARS + 1];
 
   bitmap_string_hex(blk.prev_hash, prev_hash_buffer, HASH_SIZE_HEX_CHARS + 1);
   transaction_serialise(blk.trans, transaction_buffer, TRANSACTION_SERIALISATION_MAX_CHARS);
-  bitmap_string_hex(blk.proof_of_work, proof_of_work_buffer, HASH_SIZE_HEX_CHARS + 1);
 
-  sprintf(buffer, "%s\n%s\n%s", prev_hash_buffer, transaction_buffer, proof_of_work_buffer);
+  sprintf(buffer, "%s\n%s\n%llu", prev_hash_buffer, transaction_buffer, blk.proof_of_work);
 }
+
+// Get the SHA256 hash of `blk`
+bitmap block_hash(block blk) {
+  char buffer[BLOCK_SERIALISATION_MAX_CHARS];
+
+  block_serialise(blk, buffer, BLOCK_SERIALISATION_MAX_CHARS);
+  return sha256(buffer);
+}
+
+// Increment `blk->proof_of_work` until we have at least `POW_LEADING_ZEROS` leading zeros in the block's hash.
+// This method should take a while to run
+void block_find_proof_of_work(block *blk) {
+  // Just keep adding one to the POW until we find one with enough leading zeros
+  while (1) {
+    bitmap hash = block_hash(*blk);
+    int leading_zeros = bitmap_leading_zeros(hash);
+    bitmap_free(&hash);
+
+    if (leading_zeros >= POW_LEADING_ZEROS) return;
+
+    blk->proof_of_work++;
+  }
+}
+
+// Get whether the proof of work stored in `blk` is valid
+int block_proof_of_work_is_valid(block blk) {
+  bitmap hash = block_hash(blk);
+  int result = (bitmap_leading_zeros(hash) >= POW_LEADING_ZEROS);
+
+  bitmap_free(&hash);
+
+  return result;
+}
+
+// Get whether the hash of `prev_blk` equals `curr_blk.prev_hash`
+int block_prev_block_hash_matches(block prev_blk, block curr_blk) {
+  bitmap prev_hash = block_hash(prev_blk);
+  int result = bitmap_equal(prev_hash, curr_blk.prev_hash);
+
+  bitmap_free(&prev_hash);
+
+  return result;
+}
+
+// Free the memory associated with `blk`
+void block_free(block *blk) { bitmap_free(&(blk->prev_hash)); }
