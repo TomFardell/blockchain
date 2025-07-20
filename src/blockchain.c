@@ -133,3 +133,57 @@ int block_prev_block_hash_matches(block prev_blk, block curr_blk) {
 
 // Free the memory associated with `blk`
 void block_free(block *blk) { bitmap_free(&(blk->prev_hash)); }
+
+// Initialise a chain node on the heap. For this to be a genesis node, have `prev_node` be `NULL`
+chain_node *chain_node_init(chain_node *prev_node, transaction trans) {
+  chain_node *result = malloc(sizeof *result);  // Allocate the chain node on the heap
+  if (!result) {
+    fprintf(stderr, "Error allocating memory for chain_node.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Create genesis block if `prev_node` is passed as NULL
+  if (prev_node == NULL) {
+    result->blk = block_init_genesis(trans);
+    result->prev = NULL;
+    result->index = 0;
+  } else {
+    result->blk = block_init(prev_node->blk, trans);
+    result->prev = prev_node;
+    result->index = prev_node->index + 1;
+  }
+
+  return result;
+}
+
+// Free the memory associated with `node`, i.e. the stored block and the node itself
+void chain_node_free(chain_node *node) {
+  block_free(&(node->blk));
+  free(node);
+  node = NULL;
+}
+
+// Initialise a chain of size 1 containing a single genesis block with the given transaction, `genesis_trans`
+chain chain_init(transaction genesis_trans) {
+  chain_node *initial_chain_node = chain_node_init(NULL, genesis_trans);
+  return (chain){initial_chain_node, initial_chain_node, 1};
+}
+
+// Add a new node to the end of the chain, `chn`
+void chain_add_node(chain *chn, transaction trans) {
+  chain_node *new_node = chain_node_init(chn->end, trans);
+  block_find_proof_of_work(&(new_node->blk));
+  chn->size++;
+  chn->end = new_node;
+}
+
+// Free the memory associated with the chain, `chn`
+void chain_free(chain *chn) {
+  chain_node *selected_node = chn->end;
+  for (int i = 0; i < chn->size; i++) {
+    chain_node *next_selected_node =
+        selected_node->prev;  // We are about to free chn->end, so need to get prev here
+    chain_node_free(selected_node);
+    selected_node = next_selected_node;
+  }
+}

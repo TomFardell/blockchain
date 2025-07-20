@@ -7,7 +7,7 @@
 
 #define NUM_BITMAP_TESTS 24
 #define NUM_SHA256_TESTS 5
-#define NUM_BLOCKCHAIN_TESTS 4
+#define NUM_BLOCKCHAIN_TESTS 5
 
 // Function signature for test functions
 typedef int (*test)(void);
@@ -28,6 +28,7 @@ int test_bitmap_1() {
 int test_bitmap_2() {
   bitmap bmap1 = bitmap_init_string("0010000");
   bitmap bmap2 = bitmap_init_string("00100");
+
   int result = bitmap_equal(bmap1, bmap2);
 
   bitmap_free(&bmap1);
@@ -39,6 +40,7 @@ int test_bitmap_2() {
 int test_bitmap_3() {
   bitmap bmap1 = bitmap_init_zeros(1);
   bitmap bmap2 = bitmap_init_string("0");
+
   int result = bitmap_equal(bmap1, bmap2);
 
   bitmap_free(&bmap1);
@@ -53,6 +55,7 @@ int test_bitmap_4() {
   bitmap_set_bit(&bmap1, 0, 1);
   bitmap_set_bit(&bmap1, 2, 1);
   bitmap_set_byte(&bmap2, 0, 128 + 32);
+
   int result = bitmap_equal(bmap1, bmap2);
 
   bitmap_free(&bmap1);
@@ -63,6 +66,7 @@ int test_bitmap_4() {
 
 int test_bitmap_5() {
   bitmap bmap = bitmap_init_string("1001");
+
   int result = (bitmap_get_bit(bmap, 0) == 1) + (bitmap_get_bit(bmap, 1) == 0) + (bitmap_get_bit(bmap, 2) == 0) +
                (bitmap_get_bit(bmap, 3) == 1);
 
@@ -74,6 +78,7 @@ int test_bitmap_5() {
 int test_bitmap_6() {
   int result = (_full_bytes_needed(8) == 1) + (_full_bytes_needed(9) == 2) + (_full_bytes_needed(0) == 0) +
                (_full_bytes_needed(15) == 2);
+
   return (result == 4);
 }
 
@@ -83,6 +88,7 @@ int test_bitmap_7() {
   bitmap expected = bitmap_init_string("011101001");
 
   bitmap xor = bitmap_xor(bmap1, bmap2);
+
   int result = bitmap_equal(expected, xor);
 
   bitmap_free(&bmap1);
@@ -99,6 +105,7 @@ int test_bitmap_8() {
   bitmap expected = bitmap_init_string("111111001");
 
   bitmap or = bitmap_or(bmap1, bmap2);
+
   int result = bitmap_equal(expected, or);
 
   bitmap_free(&bmap1);
@@ -115,6 +122,7 @@ int test_bitmap_9() {
   bitmap expected = bitmap_init_string("100010001");
 
   bitmap and = bitmap_and(bmap1, bmap2);
+
   int result = bitmap_equal(expected, and);
 
   bitmap_free(&bmap1);
@@ -289,6 +297,7 @@ int test_bitmap_19() {
 
   bitmap_free(&bmap1);
   bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
   bitmap_free(&expected);
   bitmap_free(&majority);
 
@@ -304,6 +313,11 @@ int test_bitmap_20() {
 
   int result = bitmap_equal(expected, added);
 
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&expected);
+  bitmap_free(&added);
+
   return (result == 1);
 }
 
@@ -311,9 +325,13 @@ int test_bitmap_21() {
   bitmap bmap1 = bitmap_init_string("1100110011001");
   bitmap expected = bitmap_init_string("1100110011001");
 
-  bitmap copy = bitmap_copy(bmap1);
+  bitmap bmap_copy = bitmap_copy(bmap1);
 
-  int result = bitmap_equal(expected, copy);
+  int result = bitmap_equal(expected, bmap_copy);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&expected);
+  bitmap_free(&bmap_copy);
 
   return (result == 1);
 }
@@ -326,6 +344,11 @@ int test_bitmap_22() {
   bitmap added = bitmap_add_mod(bmap1, bmap2);
 
   int result = bitmap_equal(expected, added);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&expected);
+  bitmap_free(&added);
 
   return (result == 1);
 }
@@ -342,6 +365,12 @@ int test_bitmap_23() {
   int result = (bitmap_leading_zeros(bmap1) == 18) + (bitmap_leading_zeros(bmap2) == 21) +
                (bitmap_leading_zeros(bmap3) == 48) + (bitmap_leading_zeros(bmap4) == 0) +
                (bitmap_leading_zeros(bmap5) == 6);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
+  bitmap_free(&bmap5);
 
   return (result == 5);
 }
@@ -364,6 +393,11 @@ int test_bitmap_24() {
 
   int result = (strcmp(b1, "000111000") == 0) + (strcmp(b2, "11001") == 0) + (strcmp(b3, "f1") == 0) +
                (strcmp(b4, "face") == 0);
+
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&bmap4);
 
   return (result == 4);
 }
@@ -456,6 +490,13 @@ int test_sha256_4() {
 
   int result = bitmap_equal(expected1, bmap1) + bitmap_equal(expected2, bmap2) + bitmap_equal(expected3, bmap3);
 
+  bitmap_free(&bmap1);
+  bitmap_free(&bmap2);
+  bitmap_free(&bmap3);
+  bitmap_free(&expected1);
+  bitmap_free(&expected2);
+  bitmap_free(&expected3);
+
   return (result == 3);
 }
 
@@ -544,6 +585,24 @@ int test_blockchain_4() {
   return (result == 3);
 }
 
+int test_blockchain_5() {
+  transaction t1 = transaction_init(100, 0, 1);
+  transaction t2 = transaction_init(50, 1, 2);
+  transaction t3 = transaction_init(25, 2, 0);
+
+  chain chn = chain_init(t1);
+  chain_add_node(&chn, t2);
+  chain_add_node(&chn, t3);
+
+  int result = block_proof_of_work_is_valid(chn.end->blk) +
+               block_prev_block_hash_matches(chn.start->blk, chn.end->prev->blk) + (chn.size == 3) +
+               (chn.end->prev->index == 1);
+
+  chain_free(&chn);
+
+  return (result == 4);
+}
+
 // Run full bitmap tests
 int test_bitmap_full() {
   printf("Commencing %d bitmap tests.\n", NUM_BITMAP_TESTS);
@@ -588,7 +647,7 @@ int test_sha256_full() {
 int test_blockchain_full() {
   printf("Commencing %d blockchain tests.\n", NUM_BLOCKCHAIN_TESTS);
   test tests[NUM_BLOCKCHAIN_TESTS] = {&test_blockchain_1, &test_blockchain_2, &test_blockchain_3,
-                                      &test_blockchain_4};
+                                      &test_blockchain_4, &test_blockchain_5};
   int passed_tests = 0;
 
   for (int i = 0; i < NUM_BLOCKCHAIN_TESTS; i++) {

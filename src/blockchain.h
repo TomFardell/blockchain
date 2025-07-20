@@ -4,7 +4,7 @@
 #include "bitmap.h"
 
 // This is very low (so the program runs quickly)
-#define POW_LEADING_ZEROS 8
+#define POW_LEADING_ZEROS 6
 
 #define MAX_AMOUNT_PRECISION 6
 #define AMOUNT_FORMAT "%.6lf"
@@ -28,6 +28,18 @@ typedef struct block {
   u64 proof_of_work;
 } block;
 
+typedef struct chain_node {
+  block blk;
+  struct chain_node *prev;
+  int index;  // Index in the chain, i.e. genesis block would have 0 index
+} chain_node;
+
+typedef struct chain {
+  chain_node *start;
+  chain_node *end;
+  int size;
+} chain;
+
 transaction transaction_init(double amount, int payer_id, int payee_id);
 void transaction_serialise(transaction trans, char *buffer, int buffer_size);
 
@@ -39,6 +51,13 @@ void block_find_proof_of_work(block *blk);
 int block_proof_of_work_is_valid(block blk);
 int block_prev_block_hash_matches(block prev_blk, block curr_blk);
 void block_free(block *blk);
+
+chain_node *chain_node_init(chain_node *prev_node, transaction trans);
+void chain_node_free(chain_node *node);
+
+chain chain_init(transaction genesis_trans);
+void chain_add_node(chain *chn, transaction trans);
+void chain_free(chain *chn);
 
 int _num_chars_to_hold_int(int num);
 int _num_chars_to_hold_double(double num);

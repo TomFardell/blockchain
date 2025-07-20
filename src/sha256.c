@@ -194,7 +194,12 @@ bitmap sha256(const char *message) {
     for (int k = 0; k < NUM_WORKING_VARS; k++) {
       bitmap sum = bitmap_add_mod(working_vars[k], H[k]);
       bitmap_free(H + k);
+      bitmap_free(working_vars + k);
       H[k] = sum;
+    }
+
+    for (int k = 0; k < SCHEDULE_LENGTH; k++) {
+      bitmap_free(W + k);
     }
   }
 
@@ -204,9 +209,14 @@ bitmap sha256(const char *message) {
     bitmap_set_byte(&result, i, H[(i * BYTE_SIZE) / WORD_LENGTH].map[i % (WORD_LENGTH / BYTE_SIZE)]);
   }
 
+  for (int i = 0; i < NUM_WORK_ITERATIONS; i++) {
+    bitmap_free(K + i);
+  }
+
   for (int i = 0; i < NUM_WORKING_VARS; i++) {
     bitmap_free(H + i);
   }
+  bitmap_free(&padded_message);
 
   return result;
 }
