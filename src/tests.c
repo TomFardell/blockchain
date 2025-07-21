@@ -590,7 +590,8 @@ int test_blockchain_5() {
   transaction t2 = transaction_init(50, 1, 2);
   transaction t3 = transaction_init(25, 2, 0);
 
-  chain chn = chain_init(t1);
+  chain chn = chain_init();
+  chain_add_node(&chn, t1);
   chain_add_node(&chn, t2);
   chain_add_node(&chn, t3);
 

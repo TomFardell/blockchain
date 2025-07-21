@@ -51,7 +51,7 @@ void transaction_serialise(transaction trans, char *buffer, int buffer_size) {
 
   if (buffer_size < buffer_size_required + 1) {
     fprintf(stderr, "Buffer size of %d is not enough to hold serialised transaction (requires size %d).\n",
-            buffer_size, buffer_size_required);
+            buffer_size, buffer_size_required + 1);
     exit(EXIT_FAILURE);
   }
 
@@ -163,11 +163,8 @@ void chain_node_free(chain_node *node) {
   node = NULL;
 }
 
-// Initialise a chain of size 1 containing a single genesis block with the given transaction, `genesis_trans`
-chain chain_init(transaction genesis_trans) {
-  chain_node *initial_chain_node = chain_node_init(NULL, genesis_trans);
-  return (chain){initial_chain_node, initial_chain_node, 1};
-}
+// Initialise a chain of size 0
+chain chain_init() { return (chain){NULL, NULL, 0}; }
 
 // Add a new node to the end of the chain, `chn`
 void chain_add_node(chain *chn, transaction trans) {
@@ -175,6 +172,7 @@ void chain_add_node(chain *chn, transaction trans) {
   block_find_proof_of_work(&(new_node->blk));
   chn->size++;
   chn->end = new_node;
+  if (chn->size == 1) chn->start = new_node;  // If this is the genesis block, also make this node the start
 }
 
 // Free the memory associated with the chain, `chn`

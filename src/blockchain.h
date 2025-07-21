@@ -55,7 +55,7 @@ void block_free(block *blk);
 chain_node *chain_node_init(chain_node *prev_node, transaction trans);
 void chain_node_free(chain_node *node);
 
-chain chain_init(transaction genesis_trans);
+chain chain_init();
 void chain_add_node(chain *chn, transaction trans);
 void chain_free(chain *chn);
 
