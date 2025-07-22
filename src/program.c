@@ -107,6 +107,18 @@ void add_transaction(chain *chn) {
   chain_add_node(chn, trans);
 }
 
+void display_ledger(chain *chn) {
+  printf("\nDisplaying ledger of size %d:\n", chn->size);
+
+  for (chain_node *p = chn->end; p != NULL; p = p->prev) {
+    printf("| ");
+    transaction_print_on_line(p->blk.trans);
+  }
+
+  printf("\nPress ENTER to continue > ");
+  clear_stdin();
+}
+
 int main() {
   char buffer[BUFFER_SIZE];  // Buffer to hold user input
   chain chn = chain_init();
@@ -114,7 +126,12 @@ int main() {
   // TUI loop
   while (1) {
     clear_screen();
-    printf("-----| Blockchain Program |-----\n1 - Add transaction\n0 - Quit\nEnter option > ");
+    printf(
+        "-----| Blockchain Program |-----\n"
+        "1 - Add transaction\n"
+        "2 - View ledger\n"
+        "0 - Quit\n"
+        "Enter option > ");
 
     fgets(buffer, BUFFER_SIZE, stdin);
 
@@ -130,6 +147,8 @@ int main() {
 
     if (strcmp(buffer, "1") == 0) {
       add_transaction(&chn);
+    } else if (strcmp(buffer, "2") == 0) {
+      display_ledger(&chn);
     } else if (strcmp(buffer, "0") == 0) {
       break;
     } else {

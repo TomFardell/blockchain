@@ -59,6 +59,12 @@ void transaction_serialise(transaction trans, char *buffer, int buffer_size) {
           trans.transaction_id);
 }
 
+// Print the transaction details to the terminal
+void transaction_print_on_line(transaction trans) {
+  printf("%d pays %d " AMOUNT_FORMAT " (%d)\n", trans.payer_id, trans.payee_id, trans.amount,
+         trans.transaction_id);
+}
+
 // Given a transaction, create the genesis block
 block block_init_genesis(transaction trans) {
   return (block){bitmap_init_zeros(0), trans, 0};  // Using size 0 bitmap as null

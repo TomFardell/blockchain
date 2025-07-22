@@ -42,6 +42,7 @@ typedef struct chain {
 
 transaction transaction_init(double amount, int payer_id, int payee_id);
 void transaction_serialise(transaction trans, char *buffer, int buffer_size);
+void transaction_print_on_line(transaction trans);
 
 block block_init_genesis(transaction trans);
 block block_init(block prev_blk, transaction trans);
