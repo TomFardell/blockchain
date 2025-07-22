@@ -101,7 +101,7 @@ void add_transaction(chain *chn) {
 
   printf("\nTransaction of " AMOUNT_FORMAT " from %d to %d added.\nPress ENTER to continue > ", amount, payer_id,
          payee_id);
-  fgetc(stdin);
+  clear_stdin();
 
   transaction trans = transaction_init(amount, payer_id, payee_id);
   chain_add_node(chn, trans);
@@ -116,12 +116,28 @@ int main() {
     clear_screen();
     printf("-----| Blockchain Program |-----\n1 - Add transaction\n0 - Quit\nEnter option > ");
 
-    fgets(buffer, BUFFER_SIZE, stdin);  // TODO: Trim whitespace
+    fgets(buffer, BUFFER_SIZE, stdin);
 
-    if (strcmp("1\n", buffer) == 0)
+    // Try to find a newline, and replace with null terminator
+    int newline_found = 0;
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      if (buffer[i] == '\n') {
+        newline_found = 1;
+        buffer[i] = '\0';
+        break;
+      }
+    }
+
+    if (strcmp(buffer, "1") == 0) {
       add_transaction(&chn);
-    else if (strcmp("0\n", buffer) == 0)
+    } else if (strcmp(buffer, "0") == 0) {
       break;
+    } else {
+      if (!newline_found) clear_stdin();  // If no newline was found then the buffer was exceeded
+
+      printf("Please enter a valid option. Press ENTER to continue > ");
+      clear_stdin();
+    }
   }
 
   chain_free(&chn);
